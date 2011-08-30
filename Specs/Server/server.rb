@@ -3,6 +3,7 @@
 
 require 'rubygems'
 require 'sinatra/base'
+require "sinatra/reloader"
 require 'json'
 require 'ruby-debug'
 Debugger.start
@@ -20,9 +21,11 @@ class RestKit::SpecServer < Sinatra::Base
   use RestKit::Network::Timeout
   
   configure do
+    register Sinatra::Reloader
     set :logging, true
     set :dump_errors, true
     set :public, Proc.new { File.join(root, '../Fixtures') }
+    set :uploads_path, Proc.new { File.join(root, '../Fixtures/Uploads') }
   end
   
   get '/' do
@@ -73,6 +76,11 @@ class RestKit::SpecServer < Sinatra::Base
     params.to_json
   end
   
+  post '/204' do
+    content_type 'application/json'
+    ""
+  end
+  
   get '/404' do
     status 404
     content_type 'text/html'
@@ -119,6 +127,28 @@ class RestKit::SpecServer < Sinatra::Base
     ""
   end
   
+  # Expects an uploaded 'file' param
+  post '/upload' do
+    unless params['file']
+      status 500
+      return "No file parameter was provided"
+    end
+    upload_path = File.join(settings.uploads_path, params['file'][:filename])
+    File.open(upload_path, "w") do |f|
+      f.write(params['file'][:tempfile].read)
+    end
+    status 200
+    "Uploaded successfully to '#{upload_path}'"
+  end
+  
+  # Return 200 after a delay
+  get '/ok-with-delay/:delay' do
+    sleep params[:delay].to_f
+    status 200
+    content_type 'application/json'
+    ""
+  end
+
   # start the server if ruby file executed directly
   run! if app_file == $0
 end

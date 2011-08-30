@@ -8,6 +8,7 @@
 
 #import "RKObjectMapping.h"
 #import "RKObjectRelationshipMapping.h"
+#import "RKObjectPropertyInspector.h"
 #import "../Support/RKLog.h"
 
 // Constants
@@ -269,6 +270,10 @@ static NSTimeZone* defaultTimeZone = nil;
 
 - (id)mappableObjectForData:(id)mappableData {
     return [[self.objectClass new] autorelease];
+}
+
+- (Class)classForProperty:(NSString*)propertyName {
+    return [[RKObjectPropertyInspector sharedInspector] typeForProperty:propertyName ofClass:self.objectClass];
 }
 
 @end

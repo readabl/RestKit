@@ -41,7 +41,10 @@
 
 - (id)initWithResourcePath:(NSString*)resourcePath objectManager:(RKObjectManager*)objectManager delegate:(id<RKObjectLoaderDelegate>)delegate {
 	if ((self = [super initWithURL:[objectManager.client URLForResourcePath:resourcePath] delegate:delegate])) {		
-        _objectManager = objectManager;        
+        _objectManager = objectManager;
+        if (! [self.objectManager.client isKindOfClass:[RKClient class]]) {
+            NSLog(@"FWWIOUFWPOU");
+        }
         [self.objectManager.client setupRequest:self];
 	}
 
@@ -348,7 +351,7 @@
 	}
 
     if ([_delegate respondsToSelector:@selector(request:didLoadResponse:)]) {
-        [_delegate request:self didLoadResponse:response];
+        [_delegate request:self didLoadResponse:_response];
     }
     
 	if ([self isResponseMappable]) {
